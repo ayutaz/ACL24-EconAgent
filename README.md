@@ -19,20 +19,13 @@ EconAgent は、LLM（GPT）を経済エージェントの意思決定エンジ�
 4. **課税・再分配**: 累進所得税（US Federal 2018ベース、7段階）を徴収し、全エージェントへ均等に再分配する
 5. **職業提示**: 失業中のエージェントにスキルレベルに応じた職業がオファーされる
 
-## 2つの政策モデル
+## 政策モデル（GPT）
 
-### GPT モード (`--policy_model gpt`)
 - LLM が経済状況（物価・賃金・貯蓄・金利など）を自然言語プロンプトで受け取り、JSON（`{'work': 0-1, 'consumption': 0-1}`）で行動を出力する
 - 各エージェントにプロフィール（名前・年齢・都市・職業・給与）が付与され、個性ある意思決定を行う
 - **3ヶ月毎の振り返り（Reflection）**: 四半期の経済環境を回顧し、次の意思決定に活かす
 - 対話履歴を保持し、過去の文脈を踏まえた判断が可能
 - OpenAI API が必要（15プロセスで並列呼び出し）
-
-### Composite モード (`--policy_model complex`)
-- 数学的ヒューリスティック関数で行動を決定（API不要）
-- **消費**: 物価と資産の比率に基づく関数、または CATS（Credit-Augmented Heterogeneous Agent Model）理論に基づく関数をランダムに選択
-- **労働**: 収入と資産（金利考慮）の比率から労働確率を算出
-- ハイパーパラメータ `beta`, `gamma`, `h` で行動特性を調整可能
 
 ## エージェントのプロフィール
 
@@ -59,18 +52,14 @@ EconAgent は、LLM（GPT）を経済エージェントの意思決定エンジ�
 パッケージ管理には [uv](https://docs.astral.sh/uv/) を使用します。
 
 ```bash
-uv sync                # 基本依存のみ（Composite モード用）
-uv sync --extra gpt    # openai も含めてインストール（GPT モード用）
+uv sync                # 基本依存のインストール
+uv sync --extra gpt    # openai も含めてインストール
 ```
 
 # 実行方法
-GPT、100エージェント、240ヶ月でシミュレーションを実行する場合（simulate_utils.py に openai.api_key を設定してください）:
+100エージェント、240ヶ月でシミュレーションを実行する場合（simulate_utils.py に openai.api_key を事前に設定してください）:
 
-`uv run python simulate.py --policy_model gpt --num_agents 100 --episode_length 240`
-
-Composite、100エージェント、240ヶ月でシミュレーションを実行する場合:
-
-`uv run python simulate.py --policy_model complex --num_agents 100 --episode_length 240`
+`uv run python simulate.py --num_agents 100 --episode_length 240`
 
 RL ベースのアプローチ（**The ai economist**）については、提供されている学習コードに従い、学習済みモデルをシミュレーションに使用しています。詳細は論文の付録を参照してください。
 
@@ -78,13 +67,9 @@ RL ベースのアプローチ（**The ai economist**）については、提供
 
 | オプション | デフォルト | 説明 |
 |---|---|---|
-| `--policy_model` | `gpt` | 政策モデル。`gpt` または `complex` |
 | `--num_agents` | `100` | エージェント数 |
 | `--episode_length` | `240` | シミュレーション期間（月数） |
 | `--dialog_len` | `3` | GPT モードの対話履歴長 |
-| `--beta` | `0.1` | Complex モードの消費関数パラメータ |
-| `--gamma` | `0.1` | Complex モードの労働関数パラメータ |
-| `--h` | `1` | Complex モードの目標資産比率パラメータ |
 | `--max_price_inflation` | `0.1` | 物価の最大インフレ率 |
 | `--max_wage_inflation` | `0.05` | 賃金の最大インフレ率 |
 
@@ -98,9 +83,9 @@ RL ベースのアプローチ（**The ai economist**）については、提供
 | `obs_{step}.pkl` | 環境の観測データ |
 | `env_{step}.pkl` | 環境オブジェクト全体 |
 | `dense_log_{step}.pkl` | 全ステップの詳細ログ |
-| `dialog_{step}.pkl` | 対話履歴（GPT モードのみ） |
-| `dialog4ref_{step}.pkl` | 振り返り用対話履歴（GPT モードのみ） |
-| `dialogs/{name}` | 各エージェントの全対話ログ（GPT モードのみ） |
+| `dialog_{step}.pkl` | 対話履歴 |
+| `dialog4ref_{step}.pkl` | 振り返り用対話履歴 |
+| `dialogs/{name}` | 各エージェントの全対話ログ |
 
 # 2024年8月16日の更新
 シミュレーションは gpt-3.5-turbo-0613 でのみテストされていましたが、このモデルは現在利用できなくなり、gpt-4o-mini に置き換えられています。`gpt_error` が0より大幅に大きい場合（例: 10を超える場合）、GPT が不合理な意思決定を多数生成していることを意味しますので、プロンプトを適宜調整してください。特にフォーマット指示に関する部分を見直してください:

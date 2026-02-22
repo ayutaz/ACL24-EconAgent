@@ -11,23 +11,18 @@ ACL 2024論文「EconAgent: Large Language Model-Empowered Agents for Simulating
 [uv](https://docs.astral.sh/uv/)でパッケージ管理を行う。
 
 ```bash
-uv sync                # 基本依存のみ（complexモード用）
-uv sync --extra gpt    # openai も含めてインストール（GPTモード用）
+uv sync                # 基本依存のインストール
+uv sync --extra gpt    # openai も含めてインストール
 ```
 
 ## シミュレーション実行コマンド
 
-GPTベース（`simulate_utils.py`内の`openai.api_key`を事前に設定すること）:
+`simulate_utils.py`内の`openai.api_key`を事前に設定すること:
 ```bash
-uv run python simulate.py --policy_model gpt --num_agents 100 --episode_length 240
+uv run python simulate.py --num_agents 100 --episode_length 240
 ```
 
-ヒューリスティック（Composite）ベース（API不要）:
-```bash
-uv run python simulate.py --policy_model complex --num_agents 100 --episode_length 240
-```
-
-主なオプション: `--dialog_len`（GPTの会話履歴長）、`--beta`/`--gamma`/`--h`（complexモデル用ハイパーパラメータ）、`--max_price_inflation`/`--max_wage_inflation`
+主なオプション: `--dialog_len`（GPTの会話履歴長）、`--max_price_inflation`/`--max_wage_inflation`
 
 ## アーキテクチャ
 
@@ -37,7 +32,7 @@ uv run python simulate.py --policy_model complex --num_agents 100 --episode_leng
 - **`config.yaml`**: 環境・RL学習・エージェントポリシーの設定ファイル
 
 ### シミュレーションフロー
-`main()` → 環境初期化(`foundation.make_env_instance`) → 月次ループ（`gpt_actions`または`complex_actions`でエージェント行動を生成 → `env.step(actions)` → 6ヶ月毎にチェックポイント保存）
+`main()` → 環境初期化(`foundation.make_env_instance`) → 月次ループ（`gpt_actions`でエージェント行動を生成 → `env.step(actions)` → 6ヶ月毎にチェックポイント保存）
 
 ### Foundation フレームワーク (`ai_economist/foundation/`)
 
@@ -62,9 +57,8 @@ uv run python simulate.py --policy_model complex --num_agents 100 --episode_leng
 
 - **`scenarios/one_step_economy.py`**: `OneStepEconomy` — 月次ステップの経済シナリオ。エージェントにname/age/city/job等の属性を付与
 
-### 2つの政策モデル
-1. **`gpt`**: LLMが経済状況を自然言語で受け取り、JSON（`{'work': 0-1, 'consumption': 0-1}`）で行動を出力。3ヶ月毎に振り返り（reflection）プロンプトも実行
-2. **`complex`**: ヒューリスティック関数（`consumption_len`/`consumption_cats`/`work_income_wealth`）で行動を決定
+### 政策モデル（GPT）
+LLMが経済状況を自然言語で受け取り、JSON（`{'work': 0-1, 'consumption': 0-1}`）で行動を出力。3ヶ月毎に振り返り（reflection）プロンプトも実行
 
 ### データ
 - **`data/profiles.json`**: エージェントのプロフィール（名前・年齢・都市・職業・給与帯）
