@@ -17,7 +17,7 @@ quantiles = [0, 0.25, 0.5, 0.75, 1.0]
 from datetime import datetime
 world_start_time = datetime.strptime('2001.01', '%Y.%m')
 
-prompt_cost_1k, completion_cost_1k = 0.001, 0.002
+prompt_cost_1m, completion_cost_1m = 0.40, 1.60
 
 def prettify_document(document: str) -> str:
     # Remove sequences of whitespace characters (including newlines)
@@ -34,29 +34,31 @@ def get_multiple_completion(dialogs, num_cpus=15, temperature=0, max_tokens=100)
     return [response for response, _ in results], total_cost
 
 def get_completion(dialogs, temperature=0, max_tokens=100):
-    import openai
-    openai.api_key = 'Your Key'
     import time
-    
+    from openai import OpenAI
+
+    client = OpenAI()  # 環境変数 OPENAI_API_KEY から自動読み込み
+
     max_retries = 20
     for i in range(max_retries):
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo-0613", # inaccessible now, try gpt-4o-mini
+            response = client.chat.completions.create(
+                model="gpt-4.1-mini",
                 messages=dialogs,
                 temperature=temperature,
-                max_tokens=max_tokens
+                max_tokens=max_tokens,
+                response_format={"type": "json_object"}
             )
             prompt_tokens = response.usage.prompt_tokens
             completion_tokens = response.usage.completion_tokens
-            this_cost = prompt_tokens/1000*prompt_cost_1k + completion_tokens/1000*completion_cost_1k
-            return response.choices[0].message["content"], this_cost
+            this_cost = prompt_tokens / 1_000_000 * prompt_cost_1m + completion_tokens / 1_000_000 * completion_cost_1m
+            return response.choices[0].message.content, this_cost
         except Exception as e:
             if i < max_retries - 1:
                 time.sleep(6)
             else:
                 print(f"An error of type {type(e).__name__} occurred: {e}")
-                return "Error"
+                return "Error", 0
 
 def format_numbers(numbers):
     return '[' + ', '.join('{:.2f}'.format(num) for num in numbers) + ']'

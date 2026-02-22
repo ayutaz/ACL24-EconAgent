@@ -1,6 +1,7 @@
 from typing import Optional
 import argparse
 import fire
+import json
 import os
 import sys
 
@@ -107,7 +108,7 @@ def gpt_actions(env, obs, dialog_queue, dialog4ref_queue, gpt_path, gpt_error, t
     for idx in range(env.num_agents):
         content = results[idx]
         try:
-            extracted_actions = list(eval(content).values())
+            extracted_actions = list(json.loads(content).values())
             if not action_check(extracted_actions):
                 extracted_actions = [1, 0.5]
                 gpt_error += 1

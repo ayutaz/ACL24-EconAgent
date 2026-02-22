@@ -25,7 +25,7 @@ EconAgent は、LLM（GPT）を経済エージェントの意思決定エンジ�
 - 各エージェントにプロフィール（名前・年齢・都市・職業・給与）が付与され、個性ある意思決定を行う
 - **3ヶ月毎の振り返り（Reflection）**: 四半期の経済環境を回顧し、次の意思決定に活かす
 - 対話履歴を保持し、過去の文脈を踏まえた判断が可能
-- OpenAI API が必要（15プロセスで並列呼び出し）
+- OpenAI API が必要（15プロセスで並列呼び出し、gpt-4.1-mini を使用）
 
 ## エージェントのプロフィール
 
@@ -57,7 +57,7 @@ uv sync --extra gpt    # openai も含めてインストール
 ```
 
 # 実行方法
-100エージェント、240ヶ月でシミュレーションを実行する場合（simulate_utils.py に openai.api_key を事前に設定してください）:
+100エージェント、240ヶ月でシミュレーションを実行する場合（環境変数 OPENAI_API_KEY を事前に設定してください）:
 
 `uv run python simulate.py --num_agents 100 --episode_length 240`
 
@@ -87,7 +87,12 @@ RL ベースのアプローチ（**The ai economist**）については、提供
 | `dialog4ref_{step}.pkl` | 振り返り用対話履歴 |
 | `dialogs/{name}` | 各エージェントの全対話ログ |
 
-# 2024年8月16日の更新
-シミュレーションは gpt-3.5-turbo-0613 でのみテストされていましたが、このモデルは現在利用できなくなり、gpt-4o-mini に置き換えられています。`gpt_error` が0より大幅に大きい場合（例: 10を超える場合）、GPT が不合理な意思決定を多数生成していることを意味しますので、プロンプトを適宜調整してください。特にフォーマット指示に関する部分を見直してください:
+# モデルについて
+本シミュレーションは **gpt-4.1-mini** を使用します。openai Python SDK v1.0+ と JSON mode (`response_format: json_object`) に対応しています。
 
-*"Please share your decisions in a JSON format. The format should have two keys: 'work' (a value between 0 and 1 with intervals of 0.02, indicating the willingness or propensity to work) and 'consumption' (a value between 0 and 1 with intervals of 0.02, indicating the proportion of all your savings and income you intend to spend on essential goods)."*
+実行前に環境変数 `OPENAI_API_KEY` を設定してください:
+```bash
+export OPENAI_API_KEY="your-api-key-here"
+```
+
+`gpt_error` が多発する場合は、プロンプトの JSON 出力指示部分を調整してください。

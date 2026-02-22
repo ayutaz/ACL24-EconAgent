@@ -17,7 +17,7 @@ uv sync --extra gpt    # openai も含めてインストール
 
 ## シミュレーション実行コマンド
 
-`simulate_utils.py`内の`openai.api_key`を事前に設定すること:
+環境変数 `OPENAI_API_KEY` を事前に設定すること:
 ```bash
 uv run python simulate.py --num_agents 100 --episode_length 240
 ```
@@ -66,7 +66,7 @@ LLMが経済状況を自然言語で受け取り、JSON（`{'work': 0-1, 'consum
 
 ## 重要な注意事項
 
-- `simulate_utils.py`のGPTモデルは`gpt-3.5-turbo-0613`（現在アクセス不可）が指定されている。`gpt-4o-mini`への変更が推奨されているが、`gpt_error`が多発する場合はプロンプトのJSON出力指示部分の調整が必要
-- OpenAI APIは旧形式（`openai.ChatCompletion.create`）を使用。新しいopenaiパッケージ（v1.0+）ではAPIが変更されているため注意
+- `simulate_utils.py`のGPTモデルは`gpt-4.1-mini` を使用。openai SDK v1.0+ の新API形式（`client.chat.completions.create`）と JSON mode を採用
+- OpenAI SDK v1.0+ の新形式（`OpenAI().chat.completions.create`）を使用。APIキーは環境変数 `OPENAI_API_KEY` で設定
 - `get_multiple_completion`は`multiprocessing.Pool`（15プロセス）で並列API呼び出しを行う
-- GPTレスポンスの解析に`eval()`を使用している（セキュリティ上の注意点）
+- GPTレスポンスの解析に`json.loads()`を使用。JSON mode により安定したJSON出力を取得
