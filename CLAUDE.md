@@ -6,16 +6,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ACL 2024論文「EconAgent: Large Language Model-Empowered Agents for Simulating Macroeconomic Activities」の公式実装。LLM（GPT）を用いてマクロ経済活動をシミュレートするエージェントフレームワーク。Salesforceの[AI Economist Foundation](https://github.com/MaciejMacko/ai-economist)フレームワークを拡張している。
 
+## 環境構築
+
+[uv](https://docs.astral.sh/uv/)でパッケージ管理を行う。
+
+```bash
+uv sync                # 基本依存のみ（complexモード用）
+uv sync --extra gpt    # openai も含めてインストール（GPTモード用）
+```
+
 ## シミュレーション実行コマンド
 
 GPTベース（`simulate_utils.py`内の`openai.api_key`を事前に設定すること）:
 ```bash
-python simulate.py --policy_model gpt --num_agents 100 --episode_length 240
+uv run python simulate.py --policy_model gpt --num_agents 100 --episode_length 240
 ```
 
 ヒューリスティック（Composite）ベース（API不要）:
 ```bash
-python simulate.py --policy_model complex --num_agents 100 --episode_length 240
+uv run python simulate.py --policy_model complex --num_agents 100 --episode_length 240
 ```
 
 主なオプション: `--dialog_len`（GPTの会話履歴長）、`--beta`/`--gamma`/`--h`（complexモデル用ハイパーパラメータ）、`--max_price_inflation`/`--max_wage_inflation`
