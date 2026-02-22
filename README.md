@@ -5,14 +5,22 @@ ACL 2024 論文の公式実装です。
 
 Zheng, Stephan, et al. "The ai economist: Improving equality and productivity with ai-driven tax policies." arXiv preprint arXiv:2004.13332 (2020).
 
+# 環境構築
+パッケージ管理には [uv](https://docs.astral.sh/uv/) を使用します。
+
+```bash
+uv sync                # 基本依存のみ（Composite モード用）
+uv sync --extra gpt    # openai も含めてインストール（GPT モード用）
+```
+
 # 実行方法
 GPT-3.5、100エージェント、240ヶ月でシミュレーションを実行する場合（simulate_utils.py に openai.api_key を設定してください）:
 
-`python simulate.py --policy_model gpt --num_agents 100 --episode_length 240`
+`uv run python simulate.py --policy_model gpt --num_agents 100 --episode_length 240`
 
 Composite、100エージェント、240ヶ月でシミュレーションを実行する場合:
 
-`python simulate.py --policy_model complex --num_agents 100 --episode_length 240`
+`uv run python simulate.py --policy_model complex --num_agents 100 --episode_length 240`
 
 RL ベースのアプローチ（**The ai economist**）については、提供されている学習コードに従い、学習済みモデルをシミュレーションに使用しています。詳細は論文の付録を参照してください。
 
