@@ -8,6 +8,9 @@ import re
 import os
 import multiprocessing
 import scipy
+from dotenv import load_dotenv
+
+load_dotenv()
 
 save_path = './'
 

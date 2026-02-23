@@ -122,10 +122,10 @@ def gpt_actions(env, obs, dialog_queue, dialog4ref_queue, gpt_path, gpt_error, t
         dialog4ref_queue[idx].append({'role': 'assistant', 'content': f'{content}'})
     actions['p'] = [0]
     for idx, agent_dialog in enumerate(dialog_queue):
-        with open(f'''{gpt_path}/{env.get_agent(str(idx)).endogenous['name']}''', 'a') as f:
+        with open(f'''{gpt_path}/{env.get_agent(str(idx)).endogenous['name']}''', 'a', encoding='utf-8') as f:
             for dialog in list(agent_dialog)[-2:]:
                 f.write(f'''>>>>>>>>>{dialog['role']}: {dialog['content']}\n''')
-        
+
     if (env.world.timestep+1)%3 == 0:
         reflection_prompt = '''Given the previous quarter's economic environment, reflect on the labor, consumption, and financial markets, as well as their dynamics. What conclusions have you drawn?
         Your answer must be less than 200 words!'''
@@ -141,7 +141,7 @@ def gpt_actions(env, obs, dialog_queue, dialog4ref_queue, gpt_path, gpt_error, t
             dialog4ref_queue[idx].append({'role': 'assistant', 'content': content})
         
         for idx, agent_dialog in enumerate(dialog4ref_queue):
-             with open(f'''{gpt_path}/{env.get_agent(str(idx)).endogenous['name']}''', 'a') as f:
+             with open(f'''{gpt_path}/{env.get_agent(str(idx)).endogenous['name']}''', 'a', encoding='utf-8') as f:
                 for dialog in list(agent_dialog)[-2:]:
                     f.write(f'''>>>>>>>>>{dialog['role']}: {dialog['content']}\n''')
     return actions, gpt_error, total_cost
