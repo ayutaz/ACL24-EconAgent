@@ -17,7 +17,7 @@ uv sync --extra gpt    # openai も含めてインストール
 
 ## シミュレーション実行コマンド
 
-環境変数 `OPENAI_API_KEY` を事前に設定すること:
+APIキーは `.env` ファイル（`python-dotenv` で自動読み込み）または環境変数 `OPENAI_API_KEY` で設定:
 ```bash
 uv run python simulate.py --num_agents 100 --episode_length 240
 ```
@@ -28,7 +28,8 @@ uv run python simulate.py --num_agents 100 --episode_length 240
 
 ### エントリーポイント
 - **`simulate.py`**: メインのシミュレーション実行スクリプト。`fire.Fire(main)`でCLI引数を解析
-- **`simulate_utils.py`**: OpenAI API呼び出し、プロンプト整形、コスト計算等のユーティリティ
+- **`simulate_utils.py`**: OpenAI API呼び出し、プロンプト整形、コスト計算等のユーティリティ。`python-dotenv`で`.env`を自動読み込み
+- **`analyze_results.py`**: シミュレーション結果の分析スクリプト。マクロ経済指標・資産分布・就業率等を集計
 - **`config.yaml`**: 環境・RL学習・エージェントポリシーの設定ファイル
 
 ### シミュレーションフロー
@@ -67,6 +68,7 @@ LLMが経済状況を自然言語で受け取り、JSON（`{'work': 0-1, 'consum
 ## 重要な注意事項
 
 - `simulate_utils.py`のGPTモデルは`gpt-4.1-mini` を使用。openai SDK v1.0+ の新API形式（`client.chat.completions.create`）と JSON mode を採用
-- OpenAI SDK v1.0+ の新形式（`OpenAI().chat.completions.create`）を使用。APIキーは環境変数 `OPENAI_API_KEY` で設定
+- OpenAI SDK v1.0+ の新形式（`OpenAI().chat.completions.create`）を使用。APIキーは `.env` ファイル（`python-dotenv`）または環境変数 `OPENAI_API_KEY` で設定
+- `simulate.py`のファイル読み書きは`encoding='utf-8'`を明示指定
 - `get_multiple_completion`は`multiprocessing.Pool`（15プロセス）で並列API呼び出しを行う
 - GPTレスポンスの解析に`json.loads()`を使用。JSON mode により安定したJSON出力を取得

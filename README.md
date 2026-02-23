@@ -57,7 +57,22 @@ uv sync --extra gpt    # openai も含めてインストール
 ```
 
 # 実行方法
-100エージェント、240ヶ月でシミュレーションを実行する場合（環境変数 OPENAI_API_KEY を事前に設定してください）:
+
+## API キーの設定
+
+OpenAI API キーをプロジェクトルートの `.env` ファイルに記載するか、環境変数として設定してください（`python-dotenv` により `.env` が自動読み込みされます）:
+
+```bash
+# .env ファイルを作成（推奨）
+echo 'OPENAI_API_KEY=your-api-key-here' > .env
+
+# または環境変数を直接設定
+export OPENAI_API_KEY="your-api-key-here"
+```
+
+## シミュレーション実行
+
+100エージェント、240ヶ月でシミュレーションを実行する場合:
 
 `uv run python simulate.py --num_agents 100 --episode_length 240`
 
@@ -87,12 +102,17 @@ RL ベースのアプローチ（**The ai economist**）については、提供
 | `dialog4ref_{step}.pkl` | 振り返り用対話履歴 |
 | `dialogs/{name}` | 各エージェントの全対話ログ |
 
+## 結果分析
+
+シミュレーション完了後、`analyze_results.py` でマクロ経済指標・資産分布・就業率等を集計できます:
+
+```bash
+uv run python analyze_results.py
+```
+
+分析内容: 物価/賃金/金利の推移、四半期別就業率・消費、年次失業率、資産分布（ジニ係数・五分位）、スキル-資産相関
+
 # モデルについて
 本シミュレーションは **gpt-4.1-mini** を使用します。openai Python SDK v1.0+ と JSON mode (`response_format: json_object`) に対応しています。
-
-実行前に環境変数 `OPENAI_API_KEY` を設定してください:
-```bash
-export OPENAI_API_KEY="your-api-key-here"
-```
 
 `gpt_error` が多発する場合は、プロンプトの JSON 出力指示部分を調整してください。
